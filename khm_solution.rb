@@ -1,6 +1,6 @@
 # rubocop:disable Style/BeginBlock
 BEGIN {
-  class KHMSolutionInputs
+  class KHMSolution
     def self.target_method
       ENV['COUNT_CALLS_TO']
     end
