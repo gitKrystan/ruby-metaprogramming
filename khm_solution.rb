@@ -1,13 +1,15 @@
 # rubocop:disable Style/BeginBlock
-BEGIN { puts 'krystan begin' }
+BEGIN {
+  class KHMSolutionInputs
+    def self.target_method
+      ENV['COUNT_CALLS_TO']
+    end
+  end
+}
 
 class KHMSolution
   def self.hi
     puts 'Hello world!'
-  end
-
-  def self.target_method
-    ENV['COUNT_CALLS_TO']
   end
 end
 
