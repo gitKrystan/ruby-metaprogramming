@@ -11,7 +11,7 @@ describe KHMSolution do
   describe '#hi' do
     it 'puts Hello World on the command line' do
       system "ruby -r ./khm_solution.rb -e KHMSolution.hi > #{output_text_file}"
-      expect(output_to_string).to eql "Hello world!\n"
+      expect(output_to_string).to include "Hello world!\n"
     end
   end
 
