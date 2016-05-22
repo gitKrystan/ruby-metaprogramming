@@ -34,14 +34,16 @@ describe CallCounter do
     let(:counter) { CallCounter.new }
 
     it 'wraps an instance method with a counter, no effect on method result' do
-      counter.wrap_method_with_counter('String#size')
+      ENV['COUNT_CALLS_TO'] = 'String#size'
+      counter.wrap_method_with_counter
       9.times { 'test'.size }
       expect('test'.size).to equal 4 # rubocop:disable Performance/FixedSize
       expect(counter.count).to equal 10
     end
 
     it 'wraps an instance method that takes arguments' do
-      counter.wrap_method_with_counter('Array#join')
+      ENV['COUNT_CALLS_TO'] = 'Array#join'
+      counter.wrap_method_with_counter
       # rubocop:disable Style/WordArray
       expect(['first', 'second'].join(',')).to eq('first,second')
       expect(['third', 'fourth'].join('.')).to eq('third.fourth')
@@ -50,7 +52,8 @@ describe CallCounter do
     end
 
     it 'wraps an instance method that takes a block argument' do
-      counter.wrap_method_with_counter('Array#map!')
+      ENV['COUNT_CALLS_TO'] = 'Array#map!'
+      counter.wrap_method_with_counter
       # rubocop:disable Style/WordArray
       a = ['a', 'b', 'c', 'd']
       a.map! { |x| x + '!' }

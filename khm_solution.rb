@@ -32,11 +32,11 @@ BEGIN {
       @counter += 1
     end
 
-    def wrap_method_with_counter(method_string)
+    def wrap_method_with_counter
       counter = self
-      method_array = method_string.split('#')
-      klass = Object.const_get(method_array[0])
-      method_symbol = method_array[1].to_sym
+      method_hash = CallCounter.target_method
+      klass = method_hash[:klass]
+      method_symbol = method_hash[:method_symbol]
       klass.send(:alias_method, :method_to_count, method_symbol)
       klass.send(:define_method, method_symbol) do |*args, &block|
         counter.increment_count
