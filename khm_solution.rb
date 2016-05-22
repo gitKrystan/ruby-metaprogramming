@@ -25,9 +25,9 @@ BEGIN {
       klass = Object.const_get(method_array[0])
       method_symbol = method_array[1].to_sym
       klass.send(:alias_method, :method_to_count, method_symbol)
-      klass.send(:define_method, method_symbol) do |*args|
+      klass.send(:define_method, method_symbol) do |*args, &block|
         counter.increment_count
-        method_to_count(*args)
+        method_to_count(*args, &block)
       end
     end
   end

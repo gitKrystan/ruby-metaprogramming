@@ -43,6 +43,17 @@ describe CallCounter do
       # rubocop:enable Style/WordArray
       expect(counter.count).to equal 2
     end
+
+    it 'wraps an instance method that takes a block argument' do
+      counter = CallCounter.new
+      counter.wrap_method_with_counter('Array#map!')
+      # rubocop:disable Style/WordArray
+      a = ['a', 'b', 'c', 'd']
+      a.map! { |x| x + '!' }
+      expect(a).to eq(['a!', 'b!', 'c!', 'd!'])
+      # rubocop:enable Style/WordArray
+      expect(counter.count).to equal 1
+    end
   end
 end
 
