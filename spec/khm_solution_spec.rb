@@ -61,6 +61,14 @@ describe CallCounter do
       # rubocop:enable Style/WordArray
       expect(counter.count).to equal 1
     end
+
+    it 'wraps a class method with no effect on method result' do
+      ENV['COUNT_CALLS_TO'] = 'Object.class'
+      counter.wrap_method_with_counter
+      (1..9).each(&:class)
+      expect(10.class).to eq Fixnum
+      expect(counter.count).to eq 10
+    end
   end
 end
 

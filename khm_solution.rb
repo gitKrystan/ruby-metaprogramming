@@ -38,7 +38,14 @@ BEGIN {
       klass = method_hash[:klass]
       method_symbol = method_hash[:method_symbol]
       klass.send(:alias_method, :method_to_count, method_symbol)
-      klass.send(:define_method, method_symbol) do |*args, &block|
+
+      if method_hash[:method_type] = 'instance'
+        define_method_type = :define_method
+      elsif method_hash[:method_type] = 'class'
+        define_method_type = :define_singleton_method
+      end
+
+      klass.send(define_method_type, method_symbol) do |*args, &block|
         counter.increment_count
         method_to_count(*args, &block)
       end
