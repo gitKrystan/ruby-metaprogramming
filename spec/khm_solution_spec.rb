@@ -26,10 +26,11 @@ describe CallCounter do
   end
 
   describe '#wrap_method_with_counter' do
-    it 'wraps the String#size method with a counter' do
+    it 'wraps an instance method with a counter, no effect on method output' do
       counter = CallCounter.new
       counter.wrap_method_with_counter('String#size')
-      10.times { 'test'.size }
+      9.times { 'test'.size }
+      expect('test'.size).to equal 4
       expect(counter.count).to equal 10
     end
   end

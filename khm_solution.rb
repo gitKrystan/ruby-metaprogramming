@@ -26,8 +26,8 @@ BEGIN {
       method_symbol = method_array[1].to_sym
       klass.send(:alias_method, :method_to_count, method_symbol)
       klass.send(:define_method, method_symbol) do
-        method_to_count
         counter.increment_count
+        method_to_count
       end
     end
   end
