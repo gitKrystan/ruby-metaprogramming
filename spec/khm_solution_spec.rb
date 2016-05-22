@@ -25,10 +25,10 @@ describe CallCounter do
     it 'returns an error if COUNT_CALLS_TO is not valid'
   end
 
-  describe '#wrap_method_with_counter' do
+  describe '#wrap_instance_method_with_counter' do
     it 'wraps an instance method with a counter, no effect on method result' do
       counter = CallCounter.new
-      counter.wrap_method_with_counter('String#size')
+      counter.wrap_instance_method_with_counter('String#size')
       9.times { 'test'.size }
       expect('test'.size).to equal 4 # rubocop:disable Performance/FixedSize
       expect(counter.count).to equal 10
@@ -36,7 +36,7 @@ describe CallCounter do
 
     it 'wraps an instance method that takes arguments' do
       counter = CallCounter.new
-      counter.wrap_method_with_counter('Array#join')
+      counter.wrap_instance_method_with_counter('Array#join')
       # rubocop:disable Style/WordArray
       expect(['first', 'second'].join(',')).to eq('first,second')
       expect(['third', 'fourth'].join('.')).to eq('third.fourth')
@@ -46,7 +46,7 @@ describe CallCounter do
 
     it 'wraps an instance method that takes a block argument' do
       counter = CallCounter.new
-      counter.wrap_method_with_counter('Array#map!')
+      counter.wrap_instance_method_with_counter('Array#map!')
       # rubocop:disable Style/WordArray
       a = ['a', 'b', 'c', 'd']
       a.map! { |x| x + '!' }

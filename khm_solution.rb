@@ -19,7 +19,7 @@ BEGIN {
       @counter += 1
     end
 
-    def wrap_method_with_counter(method_string)
+    def wrap_instance_method_with_counter(method_string)
       counter = self
       method_array = method_string.split('#')
       klass = Object.const_get(method_array[0])
