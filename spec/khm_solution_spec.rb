@@ -76,6 +76,15 @@ describe CallCounter do
       expect(TestClass.class_method).to eq 'I am a class method'
       expect(counter.count).to eq 1
     end
+
+    it 'wraps a class method that takes arguments' do
+      ENV['COUNT_CALLS_TO'] = 'Array.try_convert'
+      counter = CallCounter.new
+      counter.wrap_method_with_counter
+      expect(Array.try_convert([1])).to eq [1]
+      expect(Array.try_convert('1')).to be_nil
+      expect(counter.count).to eq 2
+    end
   end
 end
 
