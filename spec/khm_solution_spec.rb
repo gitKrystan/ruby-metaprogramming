@@ -1,6 +1,12 @@
 require 'rspec'
 require './khm_solution'
 
+class TestClass
+  def self.class_method
+    'I am a class method'
+  end
+end
+
 describe CallCounter do
   let(:output_text_file) { 'tmp/test_output.txt' }
 
@@ -31,10 +37,9 @@ describe CallCounter do
   end
 
   describe '#wrap_method_with_counter' do
-    let(:counter) { CallCounter.new }
-
     it 'wraps an instance method with a counter, no effect on method result' do
       ENV['COUNT_CALLS_TO'] = 'String#size'
+      counter = CallCounter.new
       counter.wrap_method_with_counter
       9.times { 'test'.size }
       expect('test'.size).to equal 4 # rubocop:disable Performance/FixedSize
@@ -43,6 +48,7 @@ describe CallCounter do
 
     it 'wraps an instance method that takes arguments' do
       ENV['COUNT_CALLS_TO'] = 'Array#join'
+      counter = CallCounter.new
       counter.wrap_method_with_counter
       # rubocop:disable Style/WordArray
       expect(['first', 'second'].join(',')).to eq('first,second')
@@ -53,6 +59,7 @@ describe CallCounter do
 
     it 'wraps an instance method that takes a block argument' do
       ENV['COUNT_CALLS_TO'] = 'Array#map!'
+      counter = CallCounter.new
       counter.wrap_method_with_counter
       # rubocop:disable Style/WordArray
       a = ['a', 'b', 'c', 'd']
@@ -63,11 +70,11 @@ describe CallCounter do
     end
 
     it 'wraps a class method with no effect on method result' do
-      ENV['COUNT_CALLS_TO'] = 'Object.class'
+      ENV['COUNT_CALLS_TO'] = 'TestClass.class_method'
+      counter = CallCounter.new
       counter.wrap_method_with_counter
-      (1..9).each(&:class)
-      expect(10.class).to eq Fixnum
-      expect(counter.count).to eq 10
+      expect(TestClass.class_method).to eq 'I am a class method'
+      expect(counter.count).to eq 1
     end
   end
 end
