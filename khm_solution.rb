@@ -39,22 +39,30 @@ BEGIN {
       method_symbol = method_hash[:method_symbol]
 
       if method_hash[:method_type] == 'instance'
-        klass.send(:alias_method, :method_to_count, method_symbol)
-
-        klass.send(:define_method, method_symbol) do |*args, &block|
-          counter.increment_count
-          method_to_count(*args, &block)
-        end
+        counter.wrap_instance_method_with_counter(klass, method_symbol)
       elsif method_hash[:method_type] == 'class'
-        klass.singleton_class.send(:alias_method, :method_to_count, method_symbol)
-
-        klass.send(:define_singleton_method, method_symbol) do |*args, &block|
-          counter.increment_count
-          klass.send(:method_to_count, *args, &block)
-        end
+        counter.wrap_class_method_with_counter(klass, method_symbol)
       end
+    end
 
+    def wrap_instance_method_with_counter(klass, method_symbol)
+      counter = self
+      klass.send(:alias_method, :method_to_count, method_symbol)
 
+      klass.send(:define_method, method_symbol) do |*args, &block|
+        counter.increment_count
+        method_to_count(*args, &block)
+      end
+    end
+
+    def wrap_class_method_with_counter(klass, method_symbol)
+      counter = self
+      klass.singleton_class.send(:alias_method, :method_to_count, method_symbol)
+
+      klass.send(:define_singleton_method, method_symbol) do |*args, &block|
+        counter.increment_count
+        klass.send(:method_to_count, *args, &block)
+      end
     end
   end
 }
