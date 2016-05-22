@@ -26,12 +26,22 @@ describe CallCounter do
   end
 
   describe '#wrap_method_with_counter' do
-    it 'wraps an instance method with a counter, no effect on method output' do
+    it 'wraps an instance method with a counter, no effect on method result' do
       counter = CallCounter.new
       counter.wrap_method_with_counter('String#size')
       9.times { 'test'.size }
-      expect('test'.size).to equal 4
+      expect('test'.size).to equal 4 # rubocop:disable Performance/FixedSize
       expect(counter.count).to equal 10
+    end
+
+    it 'wraps an instance method that takes arguments' do
+      counter = CallCounter.new
+      counter.wrap_method_with_counter('Array#join')
+      # rubocop:disable Style/WordArray
+      expect(['first', 'second'].join(',')).to eq('first,second')
+      expect(['third', 'fourth'].join('.')).to eq('third.fourth')
+      # rubocop:enable Style/WordArray
+      expect(counter.count).to equal 2
     end
   end
 end
