@@ -8,7 +8,20 @@ BEGIN {
     end
 
     def self.target_method
-      ENV['COUNT_CALLS_TO']
+      generate_method_hash(ENV['COUNT_CALLS_TO'])
+    end
+
+    def self.generate_method_hash(method_string)
+      if method_string.include? '#'
+        method_array = method_string.split('#')
+        method_hash = { method_type: 'instance' }
+      elsif method_string.include? '.'
+        method_array = method_string.split('.')
+        method_hash = { method_type: 'class' }
+      end
+      method_hash[:klass] = Object.const_get(method_array[0])
+      method_hash[:method_symbol] = method_array[1].to_sym
+      method_hash
     end
 
     def count

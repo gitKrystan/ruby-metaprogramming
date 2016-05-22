@@ -16,18 +16,24 @@ describe CallCounter do
   end
 
   describe '.target_method' do
-    it 'returns the method specified in COUNT_CALLS_TO if valid' do
+    it 'returns a hash of method attributes if COUNT_CALLS_TO is valid' do
       valid_method = 'String#size'
       ENV['COUNT_CALLS_TO'] = valid_method
-      expect(CallCounter.target_method).to eql valid_method
+      expected_result = {
+        klass: Object.const_get('String'),
+        method_symbol: :size,
+        method_type: 'instance'
+      }
+      expect(CallCounter.target_method).to eq expected_result
     end
 
     it 'returns an error if COUNT_CALLS_TO is not valid'
   end
 
   describe '#wrap_method_with_counter' do
+    let(:counter) { CallCounter.new }
+
     it 'wraps an instance method with a counter, no effect on method result' do
-      counter = CallCounter.new
       counter.wrap_method_with_counter('String#size')
       9.times { 'test'.size }
       expect('test'.size).to equal 4 # rubocop:disable Performance/FixedSize
@@ -35,7 +41,6 @@ describe CallCounter do
     end
 
     it 'wraps an instance method that takes arguments' do
-      counter = CallCounter.new
       counter.wrap_method_with_counter('Array#join')
       # rubocop:disable Style/WordArray
       expect(['first', 'second'].join(',')).to eq('first,second')
@@ -45,7 +50,6 @@ describe CallCounter do
     end
 
     it 'wraps an instance method that takes a block argument' do
-      counter = CallCounter.new
       counter.wrap_method_with_counter('Array#map!')
       # rubocop:disable Style/WordArray
       a = ['a', 'b', 'c', 'd']
