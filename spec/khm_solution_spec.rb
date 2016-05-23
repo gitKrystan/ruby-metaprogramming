@@ -7,6 +7,18 @@ class TestClass
   end
 end
 
+module TestModule
+  class TestClassTwo
+    def self.class_method
+      'I am a class method'
+    end
+
+    def instance_method
+      'I am an instance method'
+    end
+  end
+end
+
 describe CallCounter do
   let(:output_text_file) { 'tmp/test_output.txt' }
 
@@ -84,6 +96,25 @@ describe CallCounter do
       expect(Array.try_convert([1])).to eq [1]
       expect(Array.try_convert('1')).to be_nil
       expect(counter.count).to eq 2
+    end
+
+    it 'wraps a namespaced instance method' do
+      ENV['COUNT_CALLS_TO'] = 'TestModule::TestClassTwo#instance_method'
+      counter = CallCounter.new
+      counter.wrap_method_with_counter
+      test_object = TestModule::TestClassTwo.new
+      4.times { test_object.instance_method }
+      expect(test_object.instance_method).to eq 'I am an instance method'
+      expect(counter.count).to eq 5
+    end
+
+    it 'wraps a namespaced class method' do
+      ENV['COUNT_CALLS_TO'] = 'TestModule::TestClassTwo.class_method'
+      counter = CallCounter.new
+      counter.wrap_method_with_counter
+      3.times { TestModule::TestClassTwo.class_method }
+      expect(TestModule::TestClassTwo.class_method).to eq 'I am a class method'
+      expect(counter.count).to eq 4
     end
   end
 end
