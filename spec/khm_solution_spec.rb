@@ -1,5 +1,6 @@
 require 'rspec'
 require './khm_solution'
+require 'base64'
 
 class TestClass
   def self.class_method
@@ -115,6 +116,15 @@ describe CallCounter do
       3.times { TestModule::TestClassTwo.class_method }
       expect(TestModule::TestClassTwo.class_method).to eq 'I am a class method'
       expect(counter.count).to eq 4
+    end
+
+    it 'wraps a function from a module' do
+      ENV['COUNT_CALLS_TO'] = 'Base64.encode64'
+      counter = CallCounter.new
+      counter.wrap_method_with_counter
+      2.times { Base64.encode64('Test string') }
+      expect(Base64.encode64('Test string')).to eq "VGVzdCBzdHJpbmc=\n"
+      expect(counter.count).to eq 3
     end
   end
 end
