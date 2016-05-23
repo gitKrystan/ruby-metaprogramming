@@ -21,17 +21,21 @@ module TestModule
 end
 
 describe CallCounter do
-  let(:output_text_file) { 'tmp/test_output.txt' }
-
   before :each do
-    File.delete(output_text_file) if File.exist?(output_text_file)
     CallCounter.reset_count
   end
 
-  describe '.hi' do
-    it 'puts Hello World on the command line' do
-      system "ruby -r ./khm_solution.rb -e CallCounter.hi > #{output_text_file}"
-      expect(output_to_string).to include "Hello world!\n"
+  describe ' CLI' do
+    let(:output_text_file) { 'tmp/test_output.txt' }
+
+    before :each do
+      File.delete(output_text_file) if File.exist?(output_text_file)
+    end
+
+    it 'puts the number of times a given method is called' do
+      system "COUNT_CALLS_TO='String#size' ruby -r ./khm_solution.rb"\
+        " -e '(1..100).each{|i| i.to_s.size if i.odd? }' > #{output_text_file}"
+      expect(output_to_string).to include 'String#size called 50 times'
     end
   end
 
