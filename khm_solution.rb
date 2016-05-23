@@ -1,11 +1,9 @@
-require 'pry'
+require 'pry' # TODO: remove pry
 
 # rubocop:disable Style/BeginBlock
 BEGIN {
   class CallCounter
-    def initialize
-      @counter = 0
-    end
+    @counter = 0
 
     def self.target_method
       generate_method_hash(ENV['COUNT_CALLS_TO'])
@@ -24,15 +22,19 @@ BEGIN {
       method_hash
     end
 
-    def count
+    def self.count
       @counter
     end
 
-    def increment_count
+    def self.increment_count
       @counter += 1
     end
 
-    def wrap_method_with_counter
+    def self.reset_count
+      @counter = 0
+    end
+
+    def self.wrap_method_with_counter
       counter = self
       method_hash = CallCounter.target_method
       klass = method_hash[:klass]
@@ -45,22 +47,20 @@ BEGIN {
       end
     end
 
-    def wrap_instance_method_with_counter(klass, method_symbol)
-      counter = self
+    def self.wrap_instance_method_with_counter(klass, method_symbol)
       klass.send(:alias_method, :method_to_count, method_symbol)
 
       klass.send(:define_method, method_symbol) do |*args, &block|
-        counter.increment_count
+        CallCounter.increment_count
         method_to_count(*args, &block)
       end
     end
 
-    def wrap_class_method_with_counter(klass, method_symbol)
-      counter = self
+    def self.wrap_class_method_with_counter(klass, method_symbol)
       klass.singleton_class.send(:alias_method, :method_to_count, method_symbol)
 
       klass.send(:define_singleton_method, method_symbol) do |*args, &block|
-        counter.increment_count
+        CallCounter.increment_count
         klass.send(:method_to_count, *args, &block)
       end
     end
@@ -73,4 +73,6 @@ class CallCounter
   end
 end
 
-at_exit { puts 'krystan end' }
+at_exit do
+  puts "#{ENV['COUNT_CALLS_TO']} called #{CallCounter.count} times"
+end

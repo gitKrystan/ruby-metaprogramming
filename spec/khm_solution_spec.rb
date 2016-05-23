@@ -25,6 +25,7 @@ describe CallCounter do
 
   before :each do
     File.delete(output_text_file) if File.exist?(output_text_file)
+    CallCounter.reset_count
   end
 
   describe '.hi' do
@@ -52,79 +53,71 @@ describe CallCounter do
   describe '#wrap_method_with_counter' do
     it 'wraps an instance method with a counter, no effect on method result' do
       ENV['COUNT_CALLS_TO'] = 'String#size'
-      counter = CallCounter.new
-      counter.wrap_method_with_counter
+      CallCounter.wrap_method_with_counter
       9.times { 'test'.size }
       expect('test'.size).to equal 4 # rubocop:disable Performance/FixedSize
-      expect(counter.count).to equal 10
+      expect(CallCounter.count).to equal 10
     end
 
     it 'wraps an instance method that takes arguments' do
       ENV['COUNT_CALLS_TO'] = 'Array#join'
-      counter = CallCounter.new
-      counter.wrap_method_with_counter
+      CallCounter.wrap_method_with_counter
       # rubocop:disable Style/WordArray
       expect(['first', 'second'].join(',')).to eq('first,second')
       expect(['third', 'fourth'].join('.')).to eq('third.fourth')
       # rubocop:enable Style/WordArray
-      expect(counter.count).to equal 2
+      expect(CallCounter.count).to equal 2
     end
 
     it 'wraps an instance method that takes a block argument' do
       ENV['COUNT_CALLS_TO'] = 'Array#map!'
-      counter = CallCounter.new
-      counter.wrap_method_with_counter
+      CallCounter.wrap_method_with_counter
       # rubocop:disable Style/WordArray
       a = ['a', 'b', 'c', 'd']
       a.map! { |x| x + '!' }
       expect(a).to eq(['a!', 'b!', 'c!', 'd!'])
       # rubocop:enable Style/WordArray
-      expect(counter.count).to equal 1
+      expect(CallCounter.count).to equal 1
     end
 
     it 'wraps a class method with no effect on method result' do
       ENV['COUNT_CALLS_TO'] = 'TestClass.class_method'
-      counter = CallCounter.new
-      counter.wrap_method_with_counter
+      CallCounter.wrap_method_with_counter
       expect(TestClass.class_method).to eq 'I am a class method'
-      expect(counter.count).to eq 1
+      expect(CallCounter.count).to eq 1
     end
 
     it 'wraps a class method that takes arguments' do
       ENV['COUNT_CALLS_TO'] = 'Array.try_convert'
-      counter = CallCounter.new
-      counter.wrap_method_with_counter
+      CallCounter.wrap_method_with_counter
       expect(Array.try_convert([1])).to eq [1]
       expect(Array.try_convert('1')).to be_nil
-      expect(counter.count).to eq 2
+      expect(CallCounter.count).to eq 2
     end
 
     it 'wraps a namespaced instance method' do
       ENV['COUNT_CALLS_TO'] = 'TestModule::TestClassTwo#instance_method'
-      counter = CallCounter.new
-      counter.wrap_method_with_counter
+      CallCounter.wrap_method_with_counter
       test_object = TestModule::TestClassTwo.new
       4.times { test_object.instance_method }
       expect(test_object.instance_method).to eq 'I am an instance method'
-      expect(counter.count).to eq 5
+      expect(CallCounter.count).to eq 5
     end
 
     it 'wraps a namespaced class method' do
       ENV['COUNT_CALLS_TO'] = 'TestModule::TestClassTwo.class_method'
-      counter = CallCounter.new
-      counter.wrap_method_with_counter
+      CallCounter.wrap_method_with_counter
       3.times { TestModule::TestClassTwo.class_method }
       expect(TestModule::TestClassTwo.class_method).to eq 'I am a class method'
-      expect(counter.count).to eq 4
+      expect(CallCounter.count).to eq 4
     end
 
     it 'wraps a function from a module' do
       ENV['COUNT_CALLS_TO'] = 'Base64.encode64'
-      counter = CallCounter.new
-      counter.wrap_method_with_counter
+      CallCounter.wrap_method_with_counter
       2.times { Base64.encode64('Test string') }
       expect(Base64.encode64('Test string')).to eq "VGVzdCBzdHJpbmc=\n"
-      expect(counter.count).to eq 3
+      expect(CallCounter.count).to eq 3
     end
   end
 end
