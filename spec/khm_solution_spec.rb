@@ -55,19 +55,14 @@ describe CallCounter do
     # end
   end
 
-  describe '.target_method' do
+  describe '.identify_target_method' do
     it 'returns a hash of method attributes if COUNT_CALLS_TO is valid' do
-      valid_method = 'String#size'
-      ENV['COUNT_CALLS_TO'] = valid_method
-      expected_result = {
-        klass: Object.const_get('String'),
-        method_symbol: :size,
-        method_type: 'instance'
-      }
-      expect(CallCounter.target_method).to eq expected_result
+      ENV['COUNT_CALLS_TO'] = 'String#size'
+      CallCounter.identify_target_method
+      expect(CallCounter.method_type).to eq 'instance'
+      expect(CallCounter.method_class).to eq Object.const_get('String')
+      expect(CallCounter.method_symbol).to eq :size
     end
-
-    it 'returns an error if COUNT_CALLS_TO is not valid'
   end
 
   describe '#wrap_method_with_counter' do

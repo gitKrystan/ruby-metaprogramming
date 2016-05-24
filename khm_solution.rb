@@ -2,28 +2,41 @@ require 'pry' # TODO: remove pry
 
 class CallCounter
   @counter = 0
+  @method_array = []
+  @method_type = nil
+  @method_class = nil
+  @method_symbol = nil
 
-  def self.target_method
-    generate_method_hash(ENV['COUNT_CALLS_TO'])
+  class << self
+    attr_reader :method_type, :method_class, :method_symbol
   end
 
-  def self.generate_method_hash(method_string)
+  def self.identify_target_method
+    add_method_type_to_hash(ENV['COUNT_CALLS_TO'])
+    add_method_name_to_hash
+    add_class_to_hash
+  end
+
+  def self.add_method_type_to_hash(method_string)
     if method_string.include? '#'
-      method_array = method_string.split('#')
-      method_hash = { method_type: 'instance' }
+      @method_array = method_string.split('#')
+      @method_type = 'instance'
     elsif method_string.include? '.'
-      method_array = method_string.split('.')
-      method_hash = { method_type: 'class' }
+      @method_array = method_string.split('.')
+      @method_type = 'class'
     end
+  end
 
-    if Object.const_defined?(method_array[0])
-      method_hash[:klass] = Object.const_get(method_array[0])
+  def self.add_method_name_to_hash
+    @method_symbol = @method_array[1].to_sym
+  end
+
+  def self.add_class_to_hash
+    if Object.const_defined?(@method_array[0])
+      @method_class = Object.const_get(@method_array[0])
     else
-      method_hash[:klass] = Object.const_set(method_array[0], Class.new)
+      @method_class = Object.const_set(@method_array[0], Class.new)
     end
-
-    method_hash[:method_symbol] = method_array[1].to_sym
-    method_hash
   end
 
   def self.count
@@ -40,13 +53,13 @@ class CallCounter
 
   def self.wrap_method_with_counter
     counter = self
-    method_hash = CallCounter.target_method
-    klass = method_hash[:klass]
-    method_symbol = method_hash[:method_symbol]
+    CallCounter.identify_target_method
+    klass = @method_class
+    method_symbol = @method_symbol
 
-    if method_hash[:method_type] == 'instance'
+    if @method_type == 'instance'
       counter.wrap_instance_method_with_counter(klass, method_symbol)
-    elsif method_hash[:method_type] == 'class'
+    elsif @method_type == 'class'
       counter.wrap_class_method_with_counter(klass, method_symbol)
     end
   end
