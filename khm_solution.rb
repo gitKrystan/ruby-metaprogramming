@@ -40,6 +40,9 @@ class CallCounter
     @method_symbol = @method_array[1].to_sym
   end
 
+  # Sets @method_class to the specified class if it exists.
+  # Creates a class matching the specified class if it doesn't exist and adds
+  # a hook to listen for the inclusion of the target method.
   def self.identify_method_class
     if Object.const_defined?(@method_array[0])
       @method_class = Object.const_get(@method_array[0])
@@ -49,6 +52,9 @@ class CallCounter
     end
   end
 
+  # Creates a new class object with an overwritten .include method that wraps
+  # any included module methods matching the target method with the counter
+  # then calls super so that expected include functionality is unchanged.
   def self.new_class_with_include_hook
     Class.new do
       def self.include(*modules)
@@ -69,6 +75,8 @@ class CallCounter
     end
   end
 
+  # Adds a counter to the target instance method if it exists. If not,
+  # calls add_counter_to_future_instance_method
   def self.wrap_instance_method_with_counter(klass, method_symbol)
     if klass.send(:instance_methods).include?(method_symbol)
       add_counter_to_instance_method(klass, method_symbol)
@@ -77,6 +85,8 @@ class CallCounter
     end
   end
 
+  # Aliases the target method then defines a method with the target method name
+  # that calls the aliased method after incrementing the counter
   def self.add_counter_to_instance_method(klass, method_symbol)
     klass.send(:alias_method, :method_to_count, method_symbol)
     klass.send(:define_method, method_symbol) do |*args, &block|
@@ -85,6 +95,9 @@ class CallCounter
     end
   end
 
+  # Uses the Module.method_added hook to 'listen' for the target method being
+  # added. Once the target method is added, resets method added (to prevent
+  # stack overflow, yay!) and calls add_counter_to_instance_method
   def self.add_counter_to_future_instance_method(klass, method_symbol)
     klass.send(:define_singleton_method, :method_added) do |method_name|
       if method_name == method_symbol
@@ -98,6 +111,8 @@ class CallCounter
     klass.send(:define_singleton_method, :method_added) { |method| }
   end
 
+  # Adds a counter to the target class method if it exists. If not,
+  # calls add_counter_to_future_class_method
   def self.wrap_class_method_with_counter(klass, method_symbol)
     if klass.send(:methods).include?(method_symbol)
       add_counter_to_class_method(klass, method_symbol)
@@ -106,6 +121,8 @@ class CallCounter
     end
   end
 
+  # Aliases the target method then defines a method with the target method name
+  # that calls the aliased method after incrementing the counter
   def self.add_counter_to_class_method(klass, method_symbol)
     klass.singleton_class.send(:alias_method, :method_to_count, method_symbol)
     klass.send(:define_singleton_method, method_symbol) do |*args, &block|
@@ -114,6 +131,9 @@ class CallCounter
     end
   end
 
+  # Uses the BasicObject.singleton_method_added hook to 'listen' for the target
+  # method being added. Once the target method is added, resets method added
+  # (to prevent stack overflow, yay!) and calls add_counter_to_class_method
   def self.add_counter_to_future_class_method(klass, target_method)
     klass.send(:define_singleton_method, :singleton_method_added) do |method|
       if method == target_method
