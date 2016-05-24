@@ -52,12 +52,11 @@ class CallCounter
   end
 
   def self.wrap_method_with_counter
-    CallCounter.identify_target_method
-
+    identify_target_method
     if @method_type == 'instance'
-      CallCounter.wrap_instance_method_with_counter(@method_class, @method_symbol)
+      wrap_instance_method_with_counter(@method_class, @method_symbol)
     elsif @method_type == 'class'
-      CallCounter.wrap_class_method_with_counter(@method_class, @method_symbol)
+      wrap_class_method_with_counter(@method_class, @method_symbol)
     end
   end
 
