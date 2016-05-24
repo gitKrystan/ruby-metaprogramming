@@ -112,6 +112,7 @@ class CallCounter
   def self.add_counter_to_class_method(klass, method_symbol)
     klass.singleton_class.send(:alias_method, :method_to_count, method_symbol)
     klass.send(:define_singleton_method, method_symbol) do |*args, &block|
+      #  if self.class == CallCounter.method_class
       CallCounter.increment_count
       klass.send(:method_to_count, *args, &block)
     end
@@ -131,12 +132,7 @@ class CallCounter
   end
 
   def self.wrap_module_method_with_counter(mod)
-    if @method_type == 'instance'
-      wrap_instance_method_with_counter(mod, @method_symbol)
-    elsif @method_type == 'class'
-      # TODO: this should probably be added upon extend rather than include
-      wrap_class_method_with_counter(mod, @method_symbol)
-    end
+    wrap_instance_method_with_counter(mod, @method_symbol)
   end
 end
 

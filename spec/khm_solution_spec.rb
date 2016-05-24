@@ -46,7 +46,7 @@ describe CallCounter do
       expect(output_to_string).to include 'A#foo called 10 times'
     end
 
-    it 'puts the number of times a given method is called'\
+    it 'puts the number of times a given instance method is called'\
        ' before the module that defines that method is included' do
       system "COUNT_CALLS_TO='B#foo' ruby -r ./khm_solution.rb"\
         " -e 'module A; def foo; puts 789; end; end; class B; include A; end;"\
