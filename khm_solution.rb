@@ -15,6 +15,8 @@ class CallCounter
     @counter = 0
   end
 
+  # Sets class instance variables based on the
+  # environment variable COUNT_CALLS_TO.
   def self.identify_target_method
     identify_method_type(ENV['COUNT_CALLS_TO'])
     identify_method_symbol
@@ -28,6 +30,9 @@ class CallCounter
     elsif method_string.include? '.'
       @method_array = method_string.split('.')
       @method_type = 'class'
+    else
+      raise 'COUNT_CALLS_TO environmental variable does not match'\
+        ' Class#instance_method or Class.class_method format'
     end
   end
 
