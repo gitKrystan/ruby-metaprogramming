@@ -25,18 +25,34 @@ describe CallCounter do
     CallCounter.reset_count
   end
 
-  describe ' CLI' do
+  describe 'CLI' do
     let(:output_text_file) { 'tmp/test_output.txt' }
 
     before :each do
       File.delete(output_text_file) if File.exist?(output_text_file)
     end
 
-    it 'puts the number of times a given method is called' do
+    it 'puts the number of times a given existing method is called' do
       system "COUNT_CALLS_TO='String#size' ruby -r ./khm_solution.rb"\
         " -e '(1..100).each{|i| i.to_s.size if i.odd? }' > #{output_text_file}"
       expect(output_to_string).to include 'String#size called 50 times'
     end
+
+    it 'puts the number of times a given newly defined method is called' do
+      system "COUNT_CALLS_TO='A#foo' ruby -r ./khm_solution.rb"\
+        " -e 'class A; def foo; puts 123; end; end;"\
+        " 10.times{A.new.foo}' > #{output_text_file}"
+      expect(output_to_string).to include '123'
+      expect(output_to_string).to include 'A#foo called 10 times'
+    end
+
+    # it 'puts the number of times a given newly defined method is called' do
+    #   system "COUNT_CALLS_TO='B#foo' ruby -r ./khm_solution.rb"\
+    #     " -e 'module A; def foo; puts 123; end; end; class B; include A; end;"\
+    #     " 10.times{B.new.foo}' > #{output_text_file}"
+    #   expect(output_to_string).to include '123'
+    #   expect(output_to_string).to include 'B#foo called 10 times'
+    # end
   end
 
   describe '.target_method' do
