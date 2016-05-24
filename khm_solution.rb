@@ -13,7 +13,7 @@ class CallCounter
 
   def self.identify_target_method
     identify_method_type(ENV['COUNT_CALLS_TO'])
-    identify_method_name
+    identify_method_symbol
     identify_method_class
   end
 
@@ -27,7 +27,7 @@ class CallCounter
     end
   end
 
-  def self.identify_method_name
+  def self.identify_method_symbol
     @method_symbol = @method_array[1].to_sym
   end
 
