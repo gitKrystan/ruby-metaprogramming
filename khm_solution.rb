@@ -135,5 +135,10 @@ end
 CallCounter.wrap_method_with_counter if ENV['COUNT_CALLS_TO']
 
 at_exit do
-  puts "#{ENV['COUNT_CALLS_TO']} called #{CallCounter.counter} times"
+  if CallCounter.counter == 1
+    time_word = 'time'
+  elsif ENV['COUNT_CALLS_TO']
+    time_word = 'times'
+  end
+  puts "#{ENV['COUNT_CALLS_TO']} called #{CallCounter.counter} #{time_word}"
 end
