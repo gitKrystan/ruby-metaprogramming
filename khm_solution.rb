@@ -52,42 +52,45 @@ class CallCounter
   end
 
   def self.wrap_method_with_counter
-    counter = self
     CallCounter.identify_target_method
-    klass = @method_class
-    method_symbol = @method_symbol
 
     if @method_type == 'instance'
-      counter.wrap_instance_method_with_counter(klass, method_symbol)
+      CallCounter.wrap_instance_method_with_counter(@method_class, @method_symbol)
     elsif @method_type == 'class'
-      counter.wrap_class_method_with_counter(klass, method_symbol)
+      CallCounter.wrap_class_method_with_counter(@method_class, @method_symbol)
     end
   end
 
   def self.wrap_instance_method_with_counter(klass, method_symbol)
     if klass.send(:instance_methods).include?(method_symbol)
-      klass.send(:alias_method, :method_to_count, method_symbol)
-
-      klass.send(:define_method, method_symbol) do |*args, &block|
-        CallCounter.increment_count
-        method_to_count(*args, &block)
-      end
+      add_counter_to_instance_method(klass, method_symbol)
     else
-      klass.send(:define_singleton_method, :method_added) do |method_name|
-        if method_name == method_symbol
-          klass.send(:alias_method, :method_to_count, method_symbol)
+      add_counter_to_future_instance_method(klass, method_symbol)
+    end
+  end
 
-          klass.send(:define_singleton_method, :method_added) { |method| }
+  def self.add_counter_to_instance_method(klass, method_symbol)
+    klass.send(:alias_method, :method_to_count, method_symbol)
+    klass.send(:define_method, method_symbol) do |*args, &block|
+      CallCounter.increment_count
+      method_to_count(*args, &block)
+    end
+  end
 
-          klass.send(:define_method, method_symbol) do |*args, &block|
-            CallCounter.increment_count
-            method_to_count(*args, &block)
-          end
-        end
+  def self.add_counter_to_future_instance_method(klass, method_symbol)
+    klass.send(:define_singleton_method, :method_added) do |method_name|
+      if method_name == method_symbol
+        CallCounter.reset_method_added(klass)
+        CallCounter.add_counter_to_instance_method(klass, method_symbol)
       end
     end
   end
 
+  def self.reset_method_added(klass)
+    klass.send(:define_singleton_method, :method_added) { |method| }
+  end
+
+  # TODO: update logic for class methods to follow pattern from instance methods
   def self.wrap_class_method_with_counter(klass, method_symbol)
     if klass.send(:methods).include?(method_symbol)
       klass.singleton_class.send(:alias_method, :method_to_count, method_symbol)
