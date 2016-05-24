@@ -30,3 +30,6 @@ A new class that inherits a method from a module. CallCounter does not count cal
 $ COUNT_CALLS_TO='C#foo' ruby -r ./khm_solution.rb -e 'module A; end; module B; def foo; end; end; class C; include(A, B); end; class D; include(A, B); end; 2.times{C.new.foo; D.new.foo}'
 # C#foo called 2 times
 ```
+
+### Tests!
+Covered with unit and acceptance tests (for CLI). Run em with `rspec`. (`bundle install` first)
