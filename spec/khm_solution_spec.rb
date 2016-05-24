@@ -46,13 +46,13 @@ describe CallCounter do
       expect(output_to_string).to include 'A#foo called 10 times'
     end
 
-    # it 'puts the number of times a given newly defined method is called' do
-    #   system "COUNT_CALLS_TO='B#foo' ruby -r ./khm_solution.rb"\
-    #     " -e 'module A; def foo; puts 123; end; end; class B; include A; end;"\
-    #     " 10.times{B.new.foo}' > #{output_text_file}"
-    #   expect(output_to_string).to include '123'
-    #   expect(output_to_string).to include 'B#foo called 10 times'
-    # end
+    it 'puts the number of times a given method is called (included from module)' do
+      system "COUNT_CALLS_TO='B#foo' ruby -r ./khm_solution.rb"\
+        " -e 'module A; def foo; puts 789; end; end; class B; include A; end;"\
+        " 3.times{B.new.foo}' > #{output_text_file}"
+      expect(output_to_string).to include '789'
+      expect(output_to_string).to include 'B#foo called 3 times'
+    end
 
     it 'puts the number of times a newly defined class method is called' do
       system "COUNT_CALLS_TO='A.foo' ruby -r ./khm_solution.rb"\

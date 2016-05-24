@@ -35,7 +35,19 @@ class CallCounter
     if Object.const_defined?(@method_array[0])
       @method_class = Object.const_get(@method_array[0])
     else
-      @method_class = Object.const_set(@method_array[0], Class.new)
+      @method_class = Object.const_set(@method_array[0],
+                                       new_class_with_include_hook)
+    end
+  end
+
+  def self.new_class_with_include_hook
+    Class.new do
+      def self.include(*modules)
+        modules.each do |mod|
+          CallCounter.wrap_module_method_with_counter(mod)
+        end
+        super
+      end
     end
   end
 
@@ -116,6 +128,14 @@ class CallCounter
 
   def self.reset_singleton_method_added(klass)
     klass.send(:define_singleton_method, :singleton_method_added) { |method| }
+  end
+
+  def self.wrap_module_method_with_counter(mod)
+    if @method_type == 'instance'
+      wrap_instance_method_with_counter(mod, @method_symbol)
+    elsif @method_type == 'class'
+      wrap_class_method_with_counter(mod, @method_symbol)
+    end
   end
 end
 
