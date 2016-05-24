@@ -12,12 +12,12 @@ class CallCounter
   end
 
   def self.identify_target_method
-    add_method_type_to_hash(ENV['COUNT_CALLS_TO'])
-    add_method_name_to_hash
-    add_class_to_hash
+    set_method_type(ENV['COUNT_CALLS_TO'])
+    set_method_name
+    set_method_class
   end
 
-  def self.add_method_type_to_hash(method_string)
+  def self.set_method_type(method_string)
     if method_string.include? '#'
       @method_array = method_string.split('#')
       @method_type = 'instance'
@@ -27,11 +27,11 @@ class CallCounter
     end
   end
 
-  def self.add_method_name_to_hash
+  def self.set_method_name
     @method_symbol = @method_array[1].to_sym
   end
 
-  def self.add_class_to_hash
+  def self.set_method_class
     if Object.const_defined?(@method_array[0])
       @method_class = Object.const_get(@method_array[0])
     else
