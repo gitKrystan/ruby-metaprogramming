@@ -1,5 +1,3 @@
-require 'pry' # TODO: remove pry
-
 class CallCounter
   @counter = 0
 
