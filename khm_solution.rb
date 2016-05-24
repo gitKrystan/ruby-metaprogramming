@@ -89,12 +89,11 @@ class CallCounter
     klass.send(:define_singleton_method, :method_added) { |method| }
   end
 
-  # TODO: update logic for class methods to follow pattern from instance methods
   def self.wrap_class_method_with_counter(klass, method_symbol)
     if klass.send(:methods).include?(method_symbol)
       add_counter_to_class_method(klass, method_symbol)
     else
-      add_counter_to_future_instance_method(klass, method_symbol)
+      add_counter_to_future_class_method(klass, method_symbol)
     end
   end
 
@@ -106,14 +105,17 @@ class CallCounter
     end
   end
 
-  def self.add_counter_to_future_class_method(klass, method_symbol)
-    # TODO: logic for future class method. something like:
-    # klass.send(:define_singleton_method, :method_added) do |method_name|
-    #   if method_name == method_symbol
-    #     # TODO: logic for resetting method_added
-    #     add_counter_to_class_method(klass, method_symbol)
-    #   end
-    # end
+  def self.add_counter_to_future_class_method(klass, target_method)
+    klass.send(:define_singleton_method, :singleton_method_added) do |method|
+      if method == target_method
+        CallCounter.reset_singleton_method_added(klass)
+        CallCounter.add_counter_to_class_method(klass, target_method)
+      end
+    end
+  end
+
+  def self.reset_singleton_method_added(klass)
+    klass.send(:define_singleton_method, :singleton_method_added) { |method| }
   end
 end
 

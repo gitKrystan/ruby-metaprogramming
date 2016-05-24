@@ -53,6 +53,14 @@ describe CallCounter do
     #   expect(output_to_string).to include '123'
     #   expect(output_to_string).to include 'B#foo called 10 times'
     # end
+
+    it 'puts the number of times a newly defined class method is called' do
+      system "COUNT_CALLS_TO='A.foo' ruby -r ./khm_solution.rb"\
+        " -e 'class A; def self.foo; puts 456; end; end;"\
+        " 5.times{A.foo}' > #{output_text_file}"
+      expect(output_to_string).to include '456'
+      expect(output_to_string).to include 'A.foo called 5 times'
+    end
   end
 
   describe '.identify_target_method' do
