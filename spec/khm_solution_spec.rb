@@ -38,7 +38,7 @@ describe CallCounter do
       expect(output_to_string).to include 'String#size called 50 times'
     end
 
-    it 'puts the number of times a given newly defined method is called' do
+    it 'puts the number of times a newly defined instance method is called' do
       system "COUNT_CALLS_TO='A#foo' ruby -r ./khm_solution.rb"\
         " -e 'class A; def foo; puts 123; end; end;"\
         " 10.times{A.new.foo}' > #{output_text_file}"
